@@ -50,11 +50,9 @@ pub fn draw_shape(
             }
         }
         Tool::Blur if shape.points.len() >= 2 => {
-            painter.rect_filled(
-                egui::Rect::from_two_pos(shape.points[0], shape.points[1]),
-                0.0,
-                egui::Color32::from_black_alpha(140),
-            );
+            let rect = egui::Rect::from_two_pos(shape.points[0], shape.points[1]);
+            // Solid black background for full redaction
+            painter.rect_filled(rect, 0.0, egui::Color32::BLACK);
         }
         Tool::Text if !shape.text.is_empty() || is_preview => {
             draw_text(painter, shape, is_preview, ctx);

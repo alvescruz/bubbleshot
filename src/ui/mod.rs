@@ -7,6 +7,7 @@ pub mod utils;
 
 pub use app::SelectionApp;
 
+/// Run the UI with the captured image data.
 pub fn run_ui(image_data: Option<Vec<u8>>, width: u32, height: u32) {
     let options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()

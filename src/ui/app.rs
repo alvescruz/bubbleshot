@@ -1,7 +1,7 @@
 use crate::ui::components::{action_button, styled_button};
 use crate::ui::painter::draw_shape;
 use crate::ui::renderer::render_to_image;
-use crate::ui::types::{Shape, Tool};
+use crate::ui::types::{ROBOTO_FONT, Shape, Tool};
 use crate::ui::utils::get_canvas_rect;
 use arboard::{Clipboard, ImageData};
 use eframe::egui::{self};
@@ -26,6 +26,7 @@ pub struct SelectionApp {
     selected_shape_index: Option<usize>,
     hover_shape_index: Option<usize>,
     current_step: usize,
+    show_exit_confirmation: bool,
 }
 
 impl SelectionApp {
@@ -44,30 +45,61 @@ impl SelectionApp {
             selected_shape_index: None,
             hover_shape_index: None,
             current_step: 1,
+            show_exit_confirmation: false,
+        }
+    }
+
+    fn finish_text_if_any(&mut self) {
+        if let Some(shape) = self.current_shape.take() {
+            if shape.tool == Tool::Text && !shape.text.is_empty() {
+                self.shapes.push(shape);
+                self.redo_stack.clear();
+            } else if shape.tool != Tool::Text {
+                // If for some reason there's another pending shape, put it back
+                self.current_shape = Some(shape);
+            }
         }
     }
 
     fn setup_fonts(&mut self, ctx: &egui::Context) {
         let mut fonts = egui::FontDefinitions::default();
+
+        // Register Roboto-Regular
+        fonts.font_data.insert(
+            "roboto".to_owned(),
+            std::sync::Arc::new(egui::FontData::from_static(ROBOTO_FONT)),
+        );
+
+        // Set Roboto as default for proportional text
+        fonts
+            .families
+            .entry(egui::FontFamily::Proportional)
+            .or_default()
+            .insert(0, "roboto".to_owned());
+
         egui_phosphor::add_to_fonts(&mut fonts, egui_phosphor::Variant::Regular);
         ctx.set_fonts(fonts);
         self.initialized_fonts = true;
     }
 
     fn handle_shortcuts(&mut self, ctx: &egui::Context, canvas_rect: egui::Rect) {
-        if ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
-            std::process::exit(0);
+        if self.show_exit_confirmation {
+            return;
         }
 
-        // 1. Coleta as ações dentro do closure (sem tocar em self)
+        if ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
+            self.show_exit_confirmation = true;
+        }
+
+        // 1. Collect actions within the closure (without touching self)
         let (save, copy, redo, undo) = ctx.input_mut(|input| {
             let save = input.consume_key(egui::Modifiers::COMMAND, egui::Key::S);
 
-            // Copiar: Ctrl+C ou Evento nativo de Copy
+            // Copy: Ctrl+C or native Copy event
             let copy = input.consume_key(egui::Modifiers::COMMAND, egui::Key::C)
                 || input.events.iter().any(|e| matches!(e, egui::Event::Copy));
 
-            // Redo: Ctrl+Shift+Z ou Ctrl+Y
+            // Redo: Ctrl+Shift+Z or Ctrl+Y
             let redo = input.consume_key(
                 egui::Modifiers::COMMAND | egui::Modifiers::SHIFT,
                 egui::Key::Z,
@@ -79,16 +111,18 @@ impl SelectionApp {
             (save, copy, redo, undo)
         });
 
-        // 2. Executa as ações fora do closure (self disponível)
+        // 2. Execute actions outside the closure (self is available)
         if save {
+            self.finish_text_if_any();
             self.save_action(canvas_rect);
         }
 
         if copy {
-            self.copy_action(canvas_rect);
+            self.finish_text_if_any();
+            self.copy_action(ctx, canvas_rect);
         }
 
-        // Redo antes do Undo para evitar conflito no consumo de teclas
+        // Redo before Undo to avoid conflict in key consumption
         if redo {
             if let Some(s) = self.redo_stack.pop() {
                 self.shapes.push(s);
@@ -105,7 +139,7 @@ impl SelectionApp {
             let img = render_to_image(&self.shapes, self.width, self.height, data, canvas_rect);
             if let Some(path) = FileDialog::new().set_file_name("shot.png").save_file() {
                 if let Err(e) = img.save(path) {
-                    eprintln!("[theoshot] Erro ao salvar imagem: {}", e);
+                    eprintln!("[theoshot] Error saving image: {}", e);
                 } else {
                     std::process::exit(0);
                 }
@@ -113,30 +147,40 @@ impl SelectionApp {
         }
     }
 
-    fn copy_action(&self, canvas_rect: egui::Rect) {
+    fn copy_action(&self, ctx: &egui::Context, canvas_rect: egui::Rect) {
         if let Some(data) = &self.image_data {
-            let img = render_to_image(&self.shapes, self.width, self.height, data, canvas_rect);
-            match Clipboard::new() {
-                Ok(mut cb) => {
-                    let (w, h) = img.dimensions();
-                    let image_data = ImageData {
-                        width: w as usize,
-                        height: h as usize,
-                        bytes: Cow::from(img.into_raw()),
-                    };
-                    if let Err(e) = cb.set_image(image_data) {
-                        eprintln!("[theoshot] Erro ao copiar imagem: {}", e);
-                    } else {
-                        // Delay para garantir persistência no Linux antes de fechar o app
-                        std::thread::sleep(std::time::Duration::from_millis(350));
-                        std::process::exit(0);
+            // Hide the window immediately to provide feedback
+            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
+
+            let shapes = self.shapes.clone();
+            let width = self.width;
+            let height = self.height;
+            let data = data.clone();
+
+            std::thread::spawn(move || {
+                let img = render_to_image(&shapes, width, height, &data, canvas_rect);
+                match Clipboard::new() {
+                    Ok(mut cb) => {
+                        let (w, h) = img.dimensions();
+                        let raw_bytes = img.into_raw();
+                        let image_data = ImageData {
+                            width: w as usize,
+                            height: h as usize,
+                            bytes: Cow::from(raw_bytes),
+                        };
+                        if let Err(e) = cb.set_image(image_data) {
+                            eprintln!("[theoshot] Error copying image: {}", e);
+                        } else {
+                            // Reduced delay for Linux persistence
+                            std::thread::sleep(std::time::Duration::from_millis(150));
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("[theoshot] Error accessing clipboard: {}", e);
                     }
                 }
-                Err(e) => {
-                    eprintln!("[theoshot] Erro ao acessar clipboard: {}", e);
-                    std::process::exit(1);
-                }
-            }
+                std::process::exit(0);
+            });
         }
     }
 
@@ -172,9 +216,9 @@ impl SelectionApp {
                     ui.horizontal(|ui| {
                         ui.spacing_mut().item_spacing = egui::vec2(10.0, 0.0);
 
-                        // Seletor de cor
+                        // Color selector
                         ui.vertical(|ui| {
-                            ui.add_space(7.0); // Centralização vertical manual
+                            ui.add_space(7.0); // Manual vertical centering
                             ui.scope(|ui| {
                                 ui.visuals_mut().widgets.inactive.rounding =
                                     egui::Rounding::same(11.0);
@@ -190,14 +234,14 @@ impl SelectionApp {
                         ui.separator();
 
                         let tools = [
-                            (Tool::Rectangle, icons::RECTANGLE, "Retângulo"),
-                            (Tool::Circle, icons::CIRCLE, "Círculo"),
-                            (Tool::Step, icons::LIST_NUMBERS, "Etapas"),
-                            (Tool::Pen, icons::PENCIL_SIMPLE, "Caneta"),
-                            (Tool::Arrow, icons::ARROW_UP_RIGHT, "Seta"),
-                            (Tool::Blur, icons::DROP, "Desfoque"),
-                            (Tool::Text, icons::TEXT_T, "Texto"),
-                            (Tool::Move, icons::CURSOR_CLICK, "Mover"),
+                            (Tool::Rectangle, icons::RECTANGLE, "Rectangle"),
+                            (Tool::Circle, icons::CIRCLE, "Circle"),
+                            (Tool::Step, icons::LIST_NUMBERS, "Steps"),
+                            (Tool::Pen, icons::PENCIL_SIMPLE, "Pen"),
+                            (Tool::Arrow, icons::ARROW_UP_RIGHT, "Arrow"),
+                            (Tool::Blur, icons::DROP, "Blur"),
+                            (Tool::Text, icons::TEXT_T, "Text"),
+                            (Tool::Move, icons::CURSOR_CLICK, "Move"),
                         ];
 
                         for (t, icon, name) in tools {
@@ -225,6 +269,9 @@ impl SelectionApp {
                             .on_hover_text(name)
                             .clicked()
                             {
+                                if self.current_tool == Tool::Text && t != Tool::Text {
+                                    self.finish_text_if_any();
+                                }
                                 self.current_tool = t;
                                 if t != Tool::Move {
                                     self.selected_shape_index = None;
@@ -239,9 +286,10 @@ impl SelectionApp {
                             false,
                             self.stroke_color,
                         )
-                        .on_hover_text("Desfazer (Ctrl+Z)")
+                        .on_hover_text("Undo (Ctrl+Z)")
                         .clicked()
                         {
+                            self.finish_text_if_any();
                             if let Some(s) = self.shapes.pop() {
                                 self.redo_stack.push(s);
                             }
@@ -252,9 +300,10 @@ impl SelectionApp {
                             false,
                             self.stroke_color,
                         )
-                        .on_hover_text("Refazer (Ctrl+Shift+Z)")
+                        .on_hover_text("Redo (Ctrl+Shift+Z)")
                         .clicked()
                         {
+                            self.finish_text_if_any();
                             if let Some(s) = self.redo_stack.pop() {
                                 self.shapes.push(s);
                             }
@@ -266,9 +315,10 @@ impl SelectionApp {
                             false,
                             self.stroke_color,
                         )
-                        .on_hover_text("Limpar Tudo")
+                        .on_hover_text("Clear All")
                         .clicked()
                         {
+                            self.finish_text_if_any();
                             self.shapes.clear();
                             self.redo_stack.clear();
                             self.current_step = 1;
@@ -282,10 +332,11 @@ impl SelectionApp {
                             false,
                             self.stroke_color,
                         )
-                        .on_hover_text("Copiar (Ctrl+C)")
+                        .on_hover_text("Copy (Ctrl+C)")
                         .clicked()
                         {
-                            self.copy_action(canvas_rect);
+                            self.finish_text_if_any();
+                            self.copy_action(ui.ctx(), canvas_rect);
                         }
 
                         if action_button(
@@ -295,9 +346,10 @@ impl SelectionApp {
                                 .color(egui::Color32::WHITE),
                             egui::Color32::from_rgb(60, 130, 255),
                         )
-                        .on_hover_text("Salvar (Ctrl+S)")
+                        .on_hover_text("Save (Ctrl+S)")
                         .clicked()
                         {
+                            self.finish_text_if_any();
                             self.save_action(canvas_rect);
                         }
                     });
@@ -306,9 +358,13 @@ impl SelectionApp {
     }
 
     fn handle_canvas_interactions(&mut self, ctx: &egui::Context, res: egui::Response) {
+        if self.show_exit_confirmation {
+            self.hover_shape_index = None;
+            return;
+        }
         let pos = res.interact_pointer_pos();
 
-        // Hover e Cursor
+        // Hover and Cursor
         if self.current_tool == Tool::Move {
             if let Some(p) = pos {
                 let mut nearest = None;
@@ -316,8 +372,8 @@ impl SelectionApp {
                 for (i, shape) in self.shapes.iter().enumerate() {
                     let bbox = shape.bounding_box();
 
-                    // Se for uma forma com "corpo" (Retângulo, Círculo, Blur, Texto, Step),
-                    // verificamos se o mouse está dentro da área.
+                    // For shapes with a "body" (Rectangle, Circle, Blur, Text, Step),
+                    // we check if the mouse is inside the area.
                     let is_inside = match shape.tool {
                         Tool::Rectangle | Tool::Blur | Tool::Text | Tool::Step => bbox.contains(p),
                         Tool::Circle if shape.points.len() >= 2 => {
@@ -330,11 +386,11 @@ impl SelectionApp {
 
                     if is_inside {
                         nearest = Some(i);
-                        break; // Prioridade para o que está em cima
+                        break; // Priority for what is on top
                     }
 
-                    // Se não estiver dentro, ou for uma ferramenta de linha (Pen, Arrow),
-                    // verificamos a proximidade dos pontos.
+                    // If not inside, or for line tools (Pen, Arrow),
+                    // we check point proximity.
                     if bbox.expand(min_dist).contains(p) {
                         for pt in &shape.points {
                             let dist = p.distance(*pt);
@@ -359,6 +415,7 @@ impl SelectionApp {
 
         // Drag Start
         if res.drag_started() {
+            self.finish_text_if_any();
             if let Some(p) = pos {
                 if self.current_tool == Tool::Move {
                     self.selected_shape_index = self.hover_shape_index;
@@ -442,9 +499,7 @@ impl SelectionApp {
                     }
                 }
                 if finished {
-                    if let Some(s) = self.current_shape.take() {
-                        self.shapes.push(s);
-                    }
+                    self.finish_text_if_any();
                 }
             }
         }
@@ -462,7 +517,7 @@ impl eframe::App for SelectionApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if !self.initialized_fonts {
             self.setup_fonts(ctx);
-            self.setup_visuals(ctx); // 👈 mover pra cá
+            self.setup_visuals(ctx);
         }
 
         let canvas_rect = get_canvas_rect(ctx, self.width, self.height);
@@ -522,6 +577,93 @@ impl eframe::App for SelectionApp {
                         self.render_toolbar(ui, canvas_rect);
                     });
             });
+
+        self.render_exit_confirmation_dialog(ctx);
+
         ctx.request_repaint();
+    }
+}
+
+impl SelectionApp {
+    fn render_exit_confirmation_dialog(&mut self, ctx: &egui::Context) {
+        if !self.show_exit_confirmation {
+            return;
+        }
+
+        egui::Window::new("Confirm Exit")
+            .collapsible(false)
+            .resizable(false)
+            .title_bar(false)
+            .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
+            .frame(
+                egui::Frame::window(&ctx.style())
+                    .fill(egui::Color32::from_rgb(35, 35, 40))
+                    .rounding(10.0)
+                    .shadow(egui::Shadow {
+                        blur: 20.0,
+                        offset: egui::vec2(0.0, 8.0),
+                        color: egui::Color32::from_black_alpha(150),
+                        ..Default::default()
+                    })
+                    .inner_margin(egui::Margin {
+                        left: 12.0,
+                        right: 12.0,
+                        top: 16.0,
+                        bottom: 16.0,
+                    })
+                    .stroke(egui::Stroke::new(1.0, egui::Color32::from_white_alpha(30))),
+            )
+            .show(ctx, |ui| {
+                ui.set_max_width(220.0);
+                ui.vertical_centered(|ui| {
+                    ui.label(
+                        egui::RichText::new("Really want to exit?")
+                            .size(17.0)
+                            .strong()
+                            .color(egui::Color32::WHITE),
+                    );
+                    ui.add_space(4.0);
+                    ui.label(
+                        egui::RichText::new("Changes will be lost.")
+                            .size(12.0)
+                            .color(egui::Color32::from_gray(160)),
+                    );
+                    ui.add_space(16.0);
+
+                    ui.horizontal(|ui| {
+                        let button_width = 85.0;
+                        let button_height = 26.0;
+                        ui.add_space((ui.available_width() - (button_width * 2.0 + 8.0)) / 2.0);
+
+                        if ui
+                            .add_sized(
+                                [button_width, button_height],
+                                egui::Button::new("Cancel")
+                                    .fill(egui::Color32::from_gray(60))
+                                    .rounding(8.0),
+                            )
+                            .clicked()
+                        {
+                            self.show_exit_confirmation = false;
+                        }
+
+                        ui.add_space(8.0);
+
+                        if ui
+                            .add_sized(
+                                [button_width, button_height],
+                                egui::Button::new(
+                                    egui::RichText::new("Exit").color(egui::Color32::WHITE),
+                                )
+                                .fill(egui::Color32::from_rgb(180, 45, 45))
+                                .rounding(8.0),
+                            )
+                            .clicked()
+                        {
+                            std::process::exit(0);
+                        }
+                    });
+                });
+            });
     }
 }

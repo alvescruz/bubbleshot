@@ -1,11 +1,8 @@
-use crate::ui::types::{Shape, Tool};
+use crate::ui::types::{ROBOTO_FONT, Shape, Tool};
 use crate::ui::utils::{get_arrow_points, point_to_pixel};
 use ab_glyph::{FontVec, PxScale};
 use eframe::egui;
-use font_kit::family_name::FamilyName;
-use font_kit::properties::Properties;
-use font_kit::source::SystemSource;
-use image::{Rgba, RgbaImage, imageops};
+use image::{Rgba, RgbaImage};
 use imageproc::drawing::{
     draw_filled_circle_mut, draw_hollow_circle_mut, draw_hollow_rect_mut, draw_line_segment_mut,
     draw_text_mut,
@@ -19,8 +16,9 @@ pub fn render_to_image(
     image_data: &[u8],
     canvas_rect: egui::Rect,
 ) -> RgbaImage {
-    let mut img = RgbaImage::from_raw(width, height, image_data.to_vec()).unwrap();
-    let font = get_system_font();
+    let mut img = RgbaImage::from_raw(width, height, image_data.to_vec())
+        .unwrap_or_else(|| RgbaImage::new(width, height));
+    let font = FontVec::try_from_vec(ROBOTO_FONT.to_vec()).ok();
 
     for shape in shapes {
         let color = Rgba([
@@ -159,37 +157,13 @@ fn render_blur(
         p1.1.abs_diff(p2.1),
     );
     if rw > 0 && rh > 0 {
-        let sub = imageops::crop_imm(img, rx, ry, rw, rh).to_image();
-        let block_size = 64;
-        let small = imageops::resize(
-            &sub,
-            (rw / block_size).max(1),
-            (rh / block_size).max(1),
-            imageops::FilterType::Nearest,
-        );
-        let pixelated = imageops::resize(&small, rw, rh, imageops::FilterType::Nearest);
-        imageops::replace(img, &pixelated, rx as i64, ry as i64);
-    }
-}
-
-pub fn get_system_font() -> Option<FontVec> {
-    let source = SystemSource::new();
-    let families = [
-        FamilyName::SansSerif,
-        FamilyName::Serif,
-        FamilyName::Monospace,
-    ];
-
-    for family in families {
-        if let Ok(handle) = source.select_best_match(&[family], &Properties::new()) {
-            if let Ok(font) = handle.load() {
-                if let Some(data) = font.copy_font_data() {
-                    if let Ok(font_vec) = FontVec::try_from_vec((*data).clone()) {
-                        return Some(font_vec);
-                    }
+        let color = Rgba([0, 0, 0, 255]);
+        for y in ry..(ry + rh) {
+            for x in rx..(rx + rw) {
+                if x < img_w && y < img_h {
+                    img.put_pixel(x, y, color);
                 }
             }
         }
     }
-    None
 }

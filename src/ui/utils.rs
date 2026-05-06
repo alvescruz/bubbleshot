@@ -41,7 +41,7 @@ pub fn get_canvas_rect(ctx: &egui::Context, img_w: u32, img_h: u32) -> egui::Rec
     let screen_rect = ctx.screen_rect();
     let ppp = ctx.pixels_per_point();
 
-    // Deixamos um pouco mais de espaço para a barra de ferramentas
+    // Leave some space for the toolbar
     let max_w = screen_rect.width() * 0.95;
     let max_h = screen_rect.height() * 0.85;
 
@@ -49,7 +49,7 @@ pub fn get_canvas_rect(ctx: &egui::Context, img_w: u32, img_h: u32) -> egui::Rec
     let img_h_pts = img_h as f32 / ppp;
 
     let (canvas_w, canvas_h) = if img_w_pts <= max_w && img_h_pts <= max_h {
-        // Se couber no tamanho nativo, usamos o tamanho nativo para evitar interpolação
+        // If it fits in native size, use native size to avoid interpolation
         (img_w_pts, img_h_pts)
     } else {
         let img_aspect = img_w as f32 / img_h as f32;
@@ -65,7 +65,7 @@ pub fn get_canvas_rect(ctx: &egui::Context, img_w: u32, img_h: u32) -> egui::Rec
         egui::vec2(canvas_w, canvas_h),
     );
 
-    // Arredonda para pixels físicos manualmente para garantir nitidez
+    // Round to physical pixels manually to ensure sharpness
     let min = egui::pos2(
         (rect.min.x * ppp).round() / ppp,
         (rect.min.y * ppp).round() / ppp,

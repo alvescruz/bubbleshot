@@ -9,7 +9,7 @@ pub struct CapturedFrame {
 }
 
 pub async fn capture_frame(interactive: bool) -> Result<CapturedFrame, String> {
-    // Usando a API de alto nível recomendada pela ashpd
+    // Using the high-level API recommended by ashpd
     let response = Screenshot::request()
         .interactive(interactive)
         .modal(true)
@@ -29,6 +29,7 @@ pub async fn capture_frame(interactive: bool) -> Result<CapturedFrame, String> {
     let (width, height) = img.dimensions();
     let data = img.to_rgba8().into_raw();
 
+    // Clean up the temporary screenshot file
     let _ = std::fs::remove_file(&path);
 
     Ok(CapturedFrame {

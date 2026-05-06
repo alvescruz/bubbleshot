@@ -1,5 +1,7 @@
 use eframe::egui;
 
+pub const ROBOTO_FONT: &[u8] = include_bytes!("../../assets/fonts/Roboto-Regular.ttf");
+
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Tool {
     Rectangle,
@@ -33,8 +35,8 @@ impl Shape {
             rect.extend_with(p);
         }
 
-        // Expandir um pouco para ferramentas como Círculo ou Texto que podem
-        // ter extensões visuais além dos pontos de controle principais.
+        // Expand slightly for tools like Circle or Text that may have
+        // visual extensions beyond the main control points.
         match self.tool {
             Tool::Circle if self.points.len() >= 2 => {
                 let center = self.points[0];
