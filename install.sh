@@ -6,7 +6,7 @@
 
 set -e
 
-REPO="alteon/theoshot"
+REPO="alvescruz/theoshot"
 BINARY_NAME="theoshot"
 INSTALL_DIR="/usr/local/bin"
 

@@ -38,15 +38,27 @@ Now you can trigger theoshot instantly anytime!
 
 ## In-App Controls
 
+### Keyboard Shortcuts
+
 | Shortcut | Action |
 | :--- | :--- |
 | `Ctrl + S` | Save the screenshot |
-| `Ctrl + C` | Copy to clipboard |
-| `Esc` | Quit without saving |
+| `Ctrl + C` | Copy to clipboard and exit |
 | `Ctrl + Z` | Undo last annotation |
+| `Ctrl + Shift + Z` / `Ctrl + Y` | Redo annotation |
+| `Esc` | Show exit confirmation / Close |
 
 ### Annotation Tools
-*   **Pen:** Free drawing for quick notes.
-*   **Rectangle:** Highlight areas with boxes.
-*   **Text:** Add clear labels.
-*   **Eraser:** Remove specific annotations.
+
+theoshot comes with a versatile set of tools to mark up your captures:
+
+*   **![Color] Color Selector:** Click the colored circle to change your drawing color.
+*   **![Pen] Pen:** Freehand drawing for quick highlights.
+*   **![Rectangle] Rectangle:** Draw boxes around areas of interest.
+*   **![Circle] Circle:** Perfect for highlighting icons or circular UI elements.
+*   **![Arrow] Arrow:** Point specifically to what matters.
+*   **![Step] Steps:** Click to place auto-incrementing numbers (1, 2, 3...) — great for tutorials!
+*   **![Blur] Blur:** Obfuscate sensitive information (passwords, usernames).
+*   **![Text] Text:** Add clear labels (press `Enter` to finish a text block).
+*   **![Move] Move:** Select and drag any existing shape to reposition it.
+*   **![Trash] Clear All:** Wipe the canvas clean and start over.

@@ -15,7 +15,7 @@ The recommended way to install **theoshot** is using our automated installation 
 The installer script will automatically handle system dependencies for major distributions.
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/alteon/theoshot/main/install.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/alvescruz/theoshot/main/install.sh | sudo bash
 ```
 
 ### What the installer does:
