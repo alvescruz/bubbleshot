@@ -52,5 +52,3 @@ Always run `cargo fmt` before submitting a Pull Request.
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix.
 3. Submit a Pull Request.
-
-4. Submit a Pull Request.

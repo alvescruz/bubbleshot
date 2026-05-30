@@ -11,7 +11,7 @@ Built with Rust and egui, theoshot provides a fast, memory-safe way to take scre
 
 ## 📸 See it in Action
 
-*(Coming Soon: Add a GIF here showing the interactive selection and annotation flow)*
+![theoshot interactive mode and annotation tools](assets/screenshots/main-demo.gif)
 
 ---
 

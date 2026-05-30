@@ -35,18 +35,45 @@ install_sys_deps() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         case "$ID" in
-            ubuntu|debian|pop|mint)
-                printf "${BLUE}==>${NC} Detected $NAME. Installing dependencies via apt...\n"
-                sudo apt-get update -qq
-                sudo apt-get install -y libgtk-3-0 libpipewire-0.3-0 libdbus-1-3 curl jq
+            ubuntu|debian|pop|mint|kali)
+                PKGS="libgtk-3-0 libpipewire-0.3-0 libdbus-1-3 curl jq"
+                MISSING=""
+                for pkg in $PKGS; do
+                    if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+                        MISSING="$MISSING $pkg"
+                    fi
+                done
+                if [ -n "$MISSING" ]; then
+                    printf "${BLUE}==>${NC} Installing missing dependencies: ${YELLOW}$MISSING${NC}...\n"
+                    sudo apt-get update -qq
+                    sudo apt-get install -y $MISSING
+                fi
                 ;;
             fedora|rhel|centos)
-                printf "${BLUE}==>${NC} Detected $NAME. Installing dependencies via dnf...\n"
-                sudo dnf install -y gtk3 pipewire-libs dbus-libs curl jq
+                PKGS="gtk3 pipewire-libs dbus-libs curl jq"
+                MISSING=""
+                for pkg in $PKGS; do
+                    if ! rpm -q "$pkg" >/dev/null 2>&1; then
+                        MISSING="$MISSING $pkg"
+                    fi
+                done
+                if [ -n "$MISSING" ]; then
+                    printf "${BLUE}==>${NC} Installing missing dependencies: ${YELLOW}$MISSING${NC}...\n"
+                    sudo dnf install -y $MISSING
+                fi
                 ;;
             arch|manjaro)
-                printf "${BLUE}==>${NC} Detected $NAME. Installing dependencies via pacman...\n"
-                sudo pacman -Sy --noconfirm gtk3 pipewire dbus curl jq
+                PKGS="gtk3 pipewire dbus curl jq"
+                MISSING=""
+                for pkg in $PKGS; do
+                    if ! pacman -Qi "$pkg" >/dev/null 2>&1; then
+                        MISSING="$MISSING $pkg"
+                    fi
+                done
+                if [ -n "$MISSING" ]; then
+                    printf "${BLUE}==>${NC} Installing missing dependencies: ${YELLOW}$MISSING${NC}...\n"
+                    sudo pacman -Sy --noconfirm $MISSING
+                fi
                 ;;
             *)
                 printf "${YELLOW}Warning:${NC} Unsupported distribution for automatic dependency installation.\n"
@@ -56,10 +83,8 @@ install_sys_deps() {
     fi
 }
 
-# Ensure curl and jq are available for the script itself
-if ! check_dep "curl" || ! check_dep "jq"; then
-    install_sys_deps
-fi
+# Ensure all dependencies are available
+install_sys_deps
 
 # Detect Architecture
 ARCH=$(uname -m)
@@ -82,12 +107,16 @@ if [ "$LATEST_RELEASE" == "null" ] || [ -z "$LATEST_RELEASE" ]; then
     exit 1
 fi
 
-printf "${BLUE}==>${NC} Downloading version ${GREEN}$LATEST_RELEASE${NC}...\n"
+printf "${BLUE}==>${NC} Downloading version ${GREEN}$LATEST_RELEASE${NC} ($ARCH)...\n"
 DOWNLOAD_URL="https://github.com/$REPO/releases/download/$LATEST_RELEASE/$ASSET_NAME"
 
-# Download to temporary location
+# Download to temporary location with progress bar
 TMP_DIR=$(mktemp -d)
-curl -sSL "$DOWNLOAD_URL" -o "$TMP_DIR/$BINARY_NAME"
+if ! curl -L --progress-bar "$DOWNLOAD_URL" -o "$TMP_DIR/$BINARY_NAME"; then
+    printf "${RED}Error:${NC} Failed to download binary from $DOWNLOAD_URL\n"
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
 
 # Installation
 printf "${BLUE}==>${NC} Installing to $INSTALL_DIR (requires sudo)...\n"
