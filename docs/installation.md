@@ -33,10 +33,26 @@ If you are not using one of the supported distros above, please install these ma
 - `libpipewire-0.3-0`
 - `libdbus-1-3`
 
+## Install via .deb (Debian/Ubuntu)
+
+Download the latest `.deb` from the [releases page](https://github.com/alvescruz/theoshot/releases):
+
+```bash
+wget https://github.com/alvescruz/theoshot/releases/latest/download/theoshot_0.2.0_amd64.deb
+sudo dpkg -i theoshot_0.2.0_amd64.deb
+```
+
+## Install via .rpm (Fedora/RHEL)
+
+```bash
+wget https://github.com/alvescruz/theoshot/releases/latest/download/theoshot-0.2.0-1.x86_64.rpm
+sudo rpm -i theoshot-0.2.0-1.x86_64.rpm
+```
+
 ## Building from Source
 
 ```bash
-git clone https://github.com/alteon/theoshot.git
+git clone https://github.com/alvescruz/theoshot.git
 cd theoshot
 cargo build --release
 sudo cp target/release/theoshot /usr/local/bin/

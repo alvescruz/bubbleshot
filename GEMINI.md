@@ -6,7 +6,7 @@
 ## Tech Stack
 - **Language:** Rust (Edition 2024)
 - **UI Framework:** `egui` / `eframe` (Immediate mode UI)
-- **Graphics/Image:** `image`, `imageproc`, `ab_glyph`
+- **Graphics/Image:** `image`, `tiny-skia`, `ab_glyph`
 - **Linux Integration:** `ashpd` (Portals), `arboard` (Clipboard)
 - **Async Runtime:** `tokio`
 
@@ -14,10 +14,13 @@
 - `src/main.rs`: Entry point, CLI mode handling (interactive vs. screen).
 - `src/capture.rs`: Handles the screenshot portal request and initial image loading.
 - `src/ui/`:
-  - `app.rs`: Main `eframe` App implementation.
-  - `painter.rs`: Drawing logic and annotation state.
-  - `renderer.rs`: Texture management and image display.
-  - `types.rs`: Shared structs and enums (e.g., Tool types).
+  - `app.rs`: Main `eframe` App implementation, event loop, tool interactions.
+  - `painter.rs`: On-screen drawing via egui for each tool.
+  - `renderer/mod.rs`: Orchestrates `render_to_image()` for save/copy.
+  - `renderer/shapes.rs`: Individual shape renderers and glyph path builder.
+  - `types.rs`: Shared structs, enums, helpers.
+  - `utils.rs`: Coordinate transforms (`point_to_pixel`).
+  - `components.rs`: Reusable egui widgets.
 
 ## Operational Directives (Agent Best Practices)
 
@@ -33,8 +36,10 @@
 - **Transparency:** The app uses a transparent, maximized, undecorated window for the overlay effect.
 
 ### 3. Image Processing
-- Use `image::RgbaImage` for manipulation.
-- When adding annotation tools, integrate with `src/ui/painter.rs`.
+- Use `image::RgbaImage` for image data and final output.
+- Render annotations via `tiny-skia` vector paths (stroke/fill with anti-aliasing).
+- Text rendering uses `ab_glyph` outline extraction + `tiny_skia::PathBuilder`.
+- When adding annotation tools, add on-screen drawing to `src/ui/painter.rs` and final render to `src/ui/renderer/shapes.rs`.
 
 ### 4. Linux/Wayland Constraints
 - Portals are async. `capture_frame` must be awaited in a `tokio` context.

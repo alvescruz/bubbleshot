@@ -1,7 +1,7 @@
 use crate::ui::components::{action_button, styled_button};
 use crate::ui::painter::draw_shape;
 use crate::ui::renderer::render_to_image;
-use crate::ui::types::{ROBOTO_FONT, Shape, Tool};
+use crate::ui::types::{ROBOTO_FONT, Shape, Tool, is_light_color};
 use crate::ui::utils::get_canvas_rect;
 use arboard::{Clipboard, ImageData};
 use eframe::egui::{self};
@@ -133,14 +133,15 @@ impl SelectionApp {
     }
 
     fn save_action(&self, canvas_rect: egui::Rect) {
-        if let Some(data) = &self.image_data {
-            let img = render_to_image(&self.shapes, self.width, self.height, data, canvas_rect);
-            if let Some(path) = FileDialog::new().set_file_name("shot.png").save_file() {
-                if let Err(e) = img.save(path) {
-                    eprintln!("[theoshot] Error saving image: {}", e);
-                } else {
-                    std::process::exit(0);
-                }
+        if let Some(data) = &self.image_data
+            && let Some(img) =
+                render_to_image(&self.shapes, self.width, self.height, data, canvas_rect)
+            && let Some(path) = FileDialog::new().set_file_name("shot.png").save_file()
+        {
+            if let Err(e) = img.save(path) {
+                eprintln!("[theoshot] Error saving image: {e}");
+            } else {
+                std::process::exit(0);
             }
         }
     }
@@ -156,7 +157,9 @@ impl SelectionApp {
             let data = data.clone();
 
             std::thread::spawn(move || {
-                let img = render_to_image(&shapes, width, height, &data, canvas_rect);
+                let Some(img) = render_to_image(&shapes, width, height, &data, canvas_rect) else {
+                    return;
+                };
                 match Clipboard::new() {
                     Ok(mut cb) => {
                         let (w, h) = img.dimensions();
@@ -167,14 +170,14 @@ impl SelectionApp {
                             bytes: Cow::from(raw_bytes),
                         };
                         if let Err(e) = cb.set_image(image_data) {
-                            eprintln!("[theoshot] Error copying image: {}", e);
+                            eprintln!("[theoshot] Error copying image: {e}");
                         } else {
                             // Reduced delay for Linux persistence
                             std::thread::sleep(std::time::Duration::from_millis(150));
                         }
                     }
                     Err(e) => {
-                        eprintln!("[theoshot] Error accessing clipboard: {}", e);
+                        eprintln!("[theoshot] Error accessing clipboard: {e}");
                     }
                 }
                 std::process::exit(0);
@@ -200,6 +203,142 @@ impl SelectionApp {
         }
     }
 
+    fn render_color_selector(&mut self, ui: &mut egui::Ui) {
+        ui.vertical(|ui| {
+            ui.add_space(7.0);
+            ui.scope(|ui| {
+                ui.visuals_mut().widgets.inactive.rounding = egui::Rounding::same(11.0);
+                ui.visuals_mut().widgets.hovered.rounding = egui::Rounding::same(11.0);
+                ui.visuals_mut().widgets.active.rounding = egui::Rounding::same(11.0);
+                ui.spacing_mut().interact_size = egui::vec2(22.0, 22.0);
+                ui.color_edit_button_srgba(&mut self.stroke_color);
+            });
+        });
+    }
+
+    fn render_tool_buttons(&mut self, ui: &mut egui::Ui) {
+        let tools = [
+            (Tool::Rectangle, icons::RECTANGLE, "Rectangle"),
+            (Tool::Circle, icons::CIRCLE, "Circle"),
+            (Tool::Step, icons::LIST_NUMBERS, "Steps"),
+            (Tool::Pen, icons::PENCIL_SIMPLE, "Pen"),
+            (Tool::Arrow, icons::ARROW_UP_RIGHT, "Arrow"),
+            (Tool::Blur, icons::DROP, "Blur"),
+            (Tool::Text, icons::TEXT_T, "Text"),
+            (Tool::Move, icons::CURSOR_CLICK, "Move"),
+        ];
+
+        for (t, icon, name) in tools {
+            let is_active = self.current_tool == t;
+            let icon_color = if is_active {
+                if is_light_color(
+                    self.stroke_color.r(),
+                    self.stroke_color.g(),
+                    self.stroke_color.b(),
+                ) {
+                    egui::Color32::BLACK
+                } else {
+                    egui::Color32::WHITE
+                }
+            } else {
+                egui::Color32::WHITE
+            };
+
+            if styled_button(
+                ui,
+                egui::RichText::new(icon).size(20.0).color(icon_color),
+                is_active,
+                self.stroke_color,
+            )
+            .on_hover_text(name)
+            .clicked()
+            {
+                if self.current_tool == Tool::Text && t != Tool::Text {
+                    self.finish_text_if_any();
+                }
+                self.current_tool = t;
+                if t != Tool::Move {
+                    self.selected_shape_index = None;
+                }
+            }
+        }
+    }
+
+    fn render_action_buttons(&mut self, ui: &mut egui::Ui, canvas_rect: egui::Rect) {
+        if styled_button(
+            ui,
+            egui::RichText::new(icons::ARROW_U_UP_LEFT).size(18.0),
+            false,
+            self.stroke_color,
+        )
+        .on_hover_text("Undo (Ctrl+Z)")
+        .clicked()
+        {
+            self.finish_text_if_any();
+            if let Some(s) = self.shapes.pop() {
+                self.redo_stack.push(s);
+            }
+        }
+        if styled_button(
+            ui,
+            egui::RichText::new(icons::ARROW_U_UP_RIGHT).size(18.0),
+            false,
+            self.stroke_color,
+        )
+        .on_hover_text("Redo (Ctrl+Shift+Z)")
+        .clicked()
+        {
+            self.finish_text_if_any();
+            if let Some(s) = self.redo_stack.pop() {
+                self.shapes.push(s);
+            }
+        }
+
+        if styled_button(
+            ui,
+            egui::RichText::new(icons::TRASH).size(18.0),
+            false,
+            self.stroke_color,
+        )
+        .on_hover_text("Clear All")
+        .clicked()
+        {
+            self.finish_text_if_any();
+            self.shapes.clear();
+            self.redo_stack.clear();
+            self.current_step = 1;
+            self.selected_shape_index = None;
+        }
+
+        ui.separator();
+        if styled_button(
+            ui,
+            egui::RichText::new(icons::COPY_SIMPLE).size(20.0),
+            false,
+            self.stroke_color,
+        )
+        .on_hover_text("Copy (Ctrl+C)")
+        .clicked()
+        {
+            self.finish_text_if_any();
+            self.copy_action(ui.ctx(), canvas_rect);
+        }
+
+        if action_button(
+            ui,
+            egui::RichText::new(icons::FLOPPY_DISK)
+                .size(20.0)
+                .color(egui::Color32::WHITE),
+            egui::Color32::from_rgb(60, 130, 255),
+        )
+        .on_hover_text("Save (Ctrl+S)")
+        .clicked()
+        {
+            self.finish_text_if_any();
+            self.save_action(canvas_rect);
+        }
+    }
+
     fn render_toolbar(&mut self, ui: &mut egui::Ui, canvas_rect: egui::Rect) {
         ui.add_space(8.0);
         ui.horizontal(|ui| {
@@ -214,205 +353,68 @@ impl SelectionApp {
                 .show(ui, |ui| {
                     ui.horizontal(|ui| {
                         ui.spacing_mut().item_spacing = egui::vec2(10.0, 0.0);
-
-                        // Color selector
-                        ui.vertical(|ui| {
-                            ui.add_space(7.0); // Manual vertical centering
-                            ui.scope(|ui| {
-                                ui.visuals_mut().widgets.inactive.rounding =
-                                    egui::Rounding::same(11.0);
-                                ui.visuals_mut().widgets.hovered.rounding =
-                                    egui::Rounding::same(11.0);
-                                ui.visuals_mut().widgets.active.rounding =
-                                    egui::Rounding::same(11.0);
-                                ui.spacing_mut().interact_size = egui::vec2(22.0, 22.0);
-                                ui.color_edit_button_srgba(&mut self.stroke_color);
-                            });
-                        });
-
+                        self.render_color_selector(ui);
                         ui.separator();
-
-                        let tools = [
-                            (Tool::Rectangle, icons::RECTANGLE, "Rectangle"),
-                            (Tool::Circle, icons::CIRCLE, "Circle"),
-                            (Tool::Step, icons::LIST_NUMBERS, "Steps"),
-                            (Tool::Pen, icons::PENCIL_SIMPLE, "Pen"),
-                            (Tool::Arrow, icons::ARROW_UP_RIGHT, "Arrow"),
-                            (Tool::Blur, icons::DROP, "Blur"),
-                            (Tool::Text, icons::TEXT_T, "Text"),
-                            (Tool::Move, icons::CURSOR_CLICK, "Move"),
-                        ];
-
-                        for (t, icon, name) in tools {
-                            let is_active = self.current_tool == t;
-                            let icon_color = if is_active {
-                                if self.stroke_color.r() as u32
-                                    + self.stroke_color.g() as u32
-                                    + self.stroke_color.b() as u32
-                                    > 382
-                                {
-                                    egui::Color32::BLACK
-                                } else {
-                                    egui::Color32::WHITE
-                                }
-                            } else {
-                                egui::Color32::WHITE
-                            };
-
-                            if styled_button(
-                                ui,
-                                egui::RichText::new(icon).size(20.0).color(icon_color),
-                                is_active,
-                                self.stroke_color,
-                            )
-                            .on_hover_text(name)
-                            .clicked()
-                            {
-                                if self.current_tool == Tool::Text && t != Tool::Text {
-                                    self.finish_text_if_any();
-                                }
-                                self.current_tool = t;
-                                if t != Tool::Move {
-                                    self.selected_shape_index = None;
-                                }
-                            }
-                        }
-
+                        self.render_tool_buttons(ui);
                         ui.separator();
-                        if styled_button(
-                            ui,
-                            egui::RichText::new(icons::ARROW_U_UP_LEFT).size(18.0),
-                            false,
-                            self.stroke_color,
-                        )
-                        .on_hover_text("Undo (Ctrl+Z)")
-                        .clicked()
-                        {
-                            self.finish_text_if_any();
-                            if let Some(s) = self.shapes.pop() {
-                                self.redo_stack.push(s);
-                            }
-                        }
-                        if styled_button(
-                            ui,
-                            egui::RichText::new(icons::ARROW_U_UP_RIGHT).size(18.0),
-                            false,
-                            self.stroke_color,
-                        )
-                        .on_hover_text("Redo (Ctrl+Shift+Z)")
-                        .clicked()
-                        {
-                            self.finish_text_if_any();
-                            if let Some(s) = self.redo_stack.pop() {
-                                self.shapes.push(s);
-                            }
-                        }
-
-                        if styled_button(
-                            ui,
-                            egui::RichText::new(icons::TRASH).size(18.0),
-                            false,
-                            self.stroke_color,
-                        )
-                        .on_hover_text("Clear All")
-                        .clicked()
-                        {
-                            self.finish_text_if_any();
-                            self.shapes.clear();
-                            self.redo_stack.clear();
-                            self.current_step = 1;
-                            self.selected_shape_index = None;
-                        }
-
-                        ui.separator();
-                        if styled_button(
-                            ui,
-                            egui::RichText::new(icons::COPY_SIMPLE).size(20.0),
-                            false,
-                            self.stroke_color,
-                        )
-                        .on_hover_text("Copy (Ctrl+C)")
-                        .clicked()
-                        {
-                            self.finish_text_if_any();
-                            self.copy_action(ui.ctx(), canvas_rect);
-                        }
-
-                        if action_button(
-                            ui,
-                            egui::RichText::new(icons::FLOPPY_DISK)
-                                .size(20.0)
-                                .color(egui::Color32::WHITE),
-                            egui::Color32::from_rgb(60, 130, 255),
-                        )
-                        .on_hover_text("Save (Ctrl+S)")
-                        .clicked()
-                        {
-                            self.finish_text_if_any();
-                            self.save_action(canvas_rect);
-                        }
+                        self.render_action_buttons(ui, canvas_rect);
                     });
                 });
         });
     }
 
-    fn handle_canvas_interactions(&mut self, ctx: &egui::Context, res: egui::Response) {
-        if self.show_exit_confirmation {
-            self.hover_shape_index = None;
+    fn handle_move_hover_and_cursor(
+        &mut self,
+        ctx: &egui::Context,
+        pos: Option<egui::Pos2>,
+        res: &egui::Response,
+    ) {
+        if self.current_tool != Tool::Move {
             return;
         }
-        let pos = res.interact_pointer_pos();
-
-        // Hover and Cursor
-        if self.current_tool == Tool::Move {
-            if let Some(p) = pos {
-                let mut nearest = None;
-                let mut min_dist = 20.0;
-                for (i, shape) in self.shapes.iter().enumerate() {
-                    let bbox = shape.bounding_box();
-
-                    // For shapes with a "body" (Rectangle, Circle, Blur, Text, Step),
-                    // we check if the mouse is inside the area.
-                    let is_inside = match shape.tool {
-                        Tool::Rectangle | Tool::Blur | Tool::Text | Tool::Step => bbox.contains(p),
-                        Tool::Circle if shape.points.len() >= 2 => {
-                            let center = shape.points[0];
-                            let radius = center.distance(shape.points[1]);
-                            p.distance(center) <= radius
-                        }
-                        _ => false,
-                    };
-
-                    if is_inside {
-                        nearest = Some(i);
-                        break; // Priority for what is on top
+        if let Some(p) = pos {
+            let mut nearest = None;
+            let mut min_dist = 20.0;
+            for (i, shape) in self.shapes.iter().enumerate() {
+                let bbox = shape.bounding_box();
+                let is_inside = match shape.tool {
+                    Tool::Rectangle | Tool::Blur | Tool::Text | Tool::Step => bbox.contains(p),
+                    Tool::Circle if shape.points.len() >= 2 => {
+                        let center = shape.points[0];
+                        let radius = center.distance(shape.points[1]);
+                        p.distance(center) <= radius
                     }
+                    _ => false,
+                };
 
-                    // If not inside, or for line tools (Pen, Arrow),
-                    // we check point proximity.
-                    if bbox.expand(min_dist).contains(p) {
-                        for pt in &shape.points {
-                            let dist = p.distance(*pt);
-                            if dist < min_dist {
-                                min_dist = dist;
-                                nearest = Some(i);
-                            }
+                if is_inside {
+                    nearest = Some(i);
+                    break;
+                }
+
+                if bbox.expand(min_dist).contains(p) {
+                    for pt in &shape.points {
+                        let dist = p.distance(*pt);
+                        if dist < min_dist {
+                            min_dist = dist;
+                            nearest = Some(i);
                         }
                     }
                 }
-                self.hover_shape_index = nearest;
-                if self.hover_shape_index.is_some() {
-                    ctx.set_cursor_icon(egui::CursorIcon::Grab);
-                }
-            } else {
-                self.hover_shape_index = None;
             }
-            if res.dragged() && self.selected_shape_index.is_some() {
-                ctx.set_cursor_icon(egui::CursorIcon::Grabbing);
+            self.hover_shape_index = nearest;
+            if self.hover_shape_index.is_some() {
+                ctx.set_cursor_icon(egui::CursorIcon::Grab);
             }
+        } else {
+            self.hover_shape_index = None;
         }
+        if res.dragged() && self.selected_shape_index.is_some() {
+            ctx.set_cursor_icon(egui::CursorIcon::Grabbing);
+        }
+    }
 
-        // Drag Start
+    fn handle_drag_operations(&mut self, res: &egui::Response, pos: Option<egui::Pos2>) {
         if res.drag_started() {
             self.finish_text_if_any();
             if let Some(p) = pos {
@@ -435,7 +437,6 @@ impl SelectionApp {
             }
         }
 
-        // Dragging
         if res.dragged()
             && let Some(p) = pos
         {
@@ -457,22 +458,22 @@ impl SelectionApp {
             }
         }
 
-        // Drag Stop
         if res.drag_stopped()
             && let Some(shape) = self.current_shape.take()
         {
-            if shape.tool != Tool::Text {
+            if shape.tool == Tool::Text {
+                self.current_shape = Some(shape);
+            } else {
                 if shape.tool == Tool::Step {
                     self.current_step += 1;
                 }
                 self.shapes.push(shape);
                 self.redo_stack.clear();
-            } else {
-                self.current_shape = Some(shape);
             }
         }
+    }
 
-        // Text input handling
+    fn handle_text_input(&mut self, ctx: &egui::Context) {
         if self.current_tool == Tool::Text
             && let Some(shape) = &mut self.current_shape
         {
@@ -504,7 +505,18 @@ impl SelectionApp {
         }
     }
 
-    fn setup_visuals(&self, ctx: &egui::Context) {
+    fn handle_canvas_interactions(&mut self, ctx: &egui::Context, res: &egui::Response) {
+        if self.show_exit_confirmation {
+            self.hover_shape_index = None;
+            return;
+        }
+        let pos = res.interact_pointer_pos();
+        self.handle_move_hover_and_cursor(ctx, pos, res);
+        self.handle_drag_operations(res, pos);
+        self.handle_text_input(ctx);
+    }
+
+    fn setup_visuals(ctx: &egui::Context) {
         let mut visuals = egui::Visuals::dark();
         visuals.panel_fill = egui::Color32::TRANSPARENT;
         visuals.window_fill = egui::Color32::TRANSPARENT;
@@ -516,7 +528,7 @@ impl eframe::App for SelectionApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if !self.initialized_fonts {
             self.setup_fonts(ctx);
-            self.setup_visuals(ctx);
+            Self::setup_visuals(ctx);
         }
 
         let canvas_rect = get_canvas_rect(ctx, self.width, self.height);
@@ -570,7 +582,7 @@ impl eframe::App for SelectionApp {
                                     draw_shape(&painter, shape, true, ctx, false, false);
                                 }
 
-                                self.handle_canvas_interactions(ctx, res);
+                                self.handle_canvas_interactions(ctx, &res);
                             });
 
                         self.render_toolbar(ui, canvas_rect);

@@ -15,17 +15,17 @@ pub async fn capture_frame(interactive: bool) -> Result<CapturedFrame, String> {
         .modal(true)
         .send()
         .await
-        .map_err(|e| format!("Portal error: {}", e))?
+        .map_err(|e| format!("Portal error: {e}"))?
         .response()
-        .map_err(|e| format!("Response error: {}", e))?;
+        .map_err(|e| format!("Response error: {e}"))?;
 
     let uri_str = response.uri().as_str();
-    let url = Url::parse(uri_str).map_err(|e| format!("Url parse error: {}", e))?;
+    let url = Url::parse(uri_str).map_err(|e| format!("Url parse error: {e}"))?;
     let path = url
         .to_file_path()
-        .map_err(|_| format!("Invalid URI: {}", uri_str))?;
+        .map_err(|()| format!("Invalid URI: {uri_str}"))?;
 
-    let img = image::open(&path).map_err(|e| format!("Image open error: {}", e))?;
+    let img = image::open(&path).map_err(|e| format!("Image open error: {e}"))?;
     let (width, height) = img.dimensions();
     let data = img.to_rgba8().into_raw();
 

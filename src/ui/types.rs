@@ -2,6 +2,10 @@ use eframe::egui;
 
 pub const ROBOTO_FONT: &[u8] = include_bytes!("../../assets/fonts/Roboto-Regular.ttf");
 
+pub fn is_light_color(r: u8, g: u8, b: u8) -> bool {
+    u32::from(r) + u32::from(g) + u32::from(b) > 382
+}
+
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Tool {
     Rectangle,

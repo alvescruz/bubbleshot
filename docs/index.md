@@ -19,6 +19,7 @@ Built with Rust and egui, theoshot provides a fast, memory-safe way to take scre
 
 - **XDG Desktop Portal Integration:** Secure and platform-agnostic screenshotting (optimized for GNOME/Wayland).
 - **Immediate Annotation:** Built-in tools to draw, highlight, and add text to your captures.
+- **Native-Resolution Output:** Screenshots saved at full screen resolution with anti-aliased vector annotations via tiny-skia.
 - **Modern Tech Stack:** Written in Rust 2024 for maximum performance.
 - **Multiple Modes:** Interactive overlay for precision or quick full-screen capture.
 - **Tutorial Friendly:** Includes a "Steps" tool to number parts of your screen easily.

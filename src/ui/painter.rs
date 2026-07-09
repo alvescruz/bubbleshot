@@ -1,4 +1,4 @@
-use crate::ui::types::{Shape, Tool};
+use crate::ui::types::{Shape, Tool, is_light_color};
 use crate::ui::utils::get_arrow_points;
 use eframe::egui;
 
@@ -135,12 +135,12 @@ fn draw_step(painter: &egui::Painter, shape: &Shape) {
     let radius = 15.0;
     let center = shape.points[0];
     painter.circle_filled(center, radius, shape.color);
-    let text_color =
-        if shape.color.r() as u32 + shape.color.g() as u32 + shape.color.b() as u32 > 382 {
-            egui::Color32::BLACK
-        } else {
-            egui::Color32::WHITE
-        };
+    let (r, g, b) = (shape.color.r(), shape.color.g(), shape.color.b());
+    let text_color = if is_light_color(r, g, b) {
+        egui::Color32::BLACK
+    } else {
+        egui::Color32::WHITE
+    };
     painter.text(
         center,
         egui::Align2::CENTER_CENTER,
@@ -152,14 +152,16 @@ fn draw_step(painter: &egui::Painter, shape: &Shape) {
 
 fn draw_text(painter: &egui::Painter, shape: &Shape, is_preview: bool, ctx: &egui::Context) {
     let mut display_text = shape.text.clone();
-    if is_preview && (ctx.input(|i| i.time) * 2.0) as i32 % 2 == 0 {
+    #[allow(clippy::cast_possible_truncation)]
+    let blink = (ctx.input(|i| i.time) * 2.0) as i32 % 2 == 0;
+    if is_preview && blink {
         display_text.push('|');
     }
     painter.text(
         shape.points[0],
         egui::Align2::LEFT_TOP,
         display_text,
-        egui::FontId::proportional(22.0),
+        egui::FontId::proportional(16.0),
         shape.color,
     );
 }
