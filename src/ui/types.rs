@@ -19,7 +19,7 @@ pub struct Shape {
     pub tool: Tool,
     pub points: Vec<egui::Pos2>,
     pub color: egui::Color32,
-    pub _thickness: f32,
+    pub thickness: f32,
     pub text: String,
     pub step_number: Option<usize>,
 }

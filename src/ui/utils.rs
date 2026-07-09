@@ -25,15 +25,11 @@ pub fn point_to_pixel(
     canvas_rect: egui::Rect,
     img_w: u32,
     img_h: u32,
-) -> (u32, u32) {
+) -> (f32, f32) {
     let x_norm = (pos.x - canvas_rect.min.x) / canvas_rect.width();
     let y_norm = (pos.y - canvas_rect.min.y) / canvas_rect.height();
-    let x = (x_norm * img_w as f32)
-        .round()
-        .clamp(0.0, img_w as f32 - 1.0) as u32;
-    let y = (y_norm * img_h as f32)
-        .round()
-        .clamp(0.0, img_h as f32 - 1.0) as u32;
+    let x = (x_norm * img_w as f32).clamp(0.0, img_w as f32 - 1.0);
+    let y = (y_norm * img_h as f32).clamp(0.0, img_h as f32 - 1.0);
     (x, y)
 }
 

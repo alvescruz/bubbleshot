@@ -17,7 +17,16 @@ pub fn draw_shape(
         shape.color.b(),
         alpha,
     );
-    let stroke_width = if is_selected || is_hovered { 2.5 } else { 1.5 };
+    let base = if shape.thickness > 0.0 {
+        shape.thickness
+    } else {
+        3.0
+    };
+    let stroke_width = if is_selected || is_hovered {
+        base + 1.0
+    } else {
+        base
+    };
     let stroke = egui::Stroke::new(stroke_width, color);
 
     if is_selected || is_hovered {

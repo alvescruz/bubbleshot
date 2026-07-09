@@ -127,10 +127,8 @@ impl SelectionApp {
             if let Some(s) = self.redo_stack.pop() {
                 self.shapes.push(s);
             }
-        } else if undo {
-            if let Some(s) = self.shapes.pop() {
-                self.redo_stack.push(s);
-            }
+        } else if undo && let Some(s) = self.shapes.pop() {
+            self.redo_stack.push(s);
         }
     }
 
@@ -185,8 +183,9 @@ impl SelectionApp {
     }
 
     fn load_background_texture(&mut self, ctx: &egui::Context) {
-        if self.texture.is_none() && self.image_data.is_some() {
-            let data = self.image_data.as_ref().unwrap();
+        if self.texture.is_none()
+            && let Some(data) = &self.image_data
+        {
             let size = [self.width as usize, self.height as usize];
 
             self.texture = Some(ctx.load_texture(
@@ -424,7 +423,7 @@ impl SelectionApp {
                         tool: self.current_tool,
                         points: vec![p, p],
                         color: self.stroke_color,
-                        _thickness: 3.0,
+                        thickness: 1.5,
                         text: String::new(),
                         step_number: if self.current_tool == Tool::Step {
                             Some(self.current_step)
@@ -437,70 +436,70 @@ impl SelectionApp {
         }
 
         // Dragging
-        if res.dragged() {
-            if let Some(p) = pos {
-                if self.current_tool == Tool::Move {
-                    if let Some(idx) = self.selected_shape_index {
-                        let delta = res.drag_delta();
-                        if let Some(shape) = self.shapes.get_mut(idx) {
-                            for pt in &mut shape.points {
-                                *pt += delta;
-                            }
+        if res.dragged()
+            && let Some(p) = pos
+        {
+            if self.current_tool == Tool::Move {
+                if let Some(idx) = self.selected_shape_index {
+                    let delta = res.drag_delta();
+                    if let Some(shape) = self.shapes.get_mut(idx) {
+                        for pt in &mut shape.points {
+                            *pt += delta;
                         }
                     }
-                } else if let Some(shape) = &mut self.current_shape {
-                    if shape.tool == Tool::Pen {
-                        shape.points.push(p);
-                    } else {
-                        shape.points[1] = p;
-                    }
+                }
+            } else if let Some(shape) = &mut self.current_shape {
+                if shape.tool == Tool::Pen {
+                    shape.points.push(p);
+                } else {
+                    shape.points[1] = p;
                 }
             }
         }
 
         // Drag Stop
-        if res.drag_stopped() {
-            if let Some(shape) = self.current_shape.take() {
-                if shape.tool != Tool::Text {
-                    if shape.tool == Tool::Step {
-                        self.current_step += 1;
-                    }
-                    self.shapes.push(shape);
-                    self.redo_stack.clear();
-                } else {
-                    self.current_shape = Some(shape);
+        if res.drag_stopped()
+            && let Some(shape) = self.current_shape.take()
+        {
+            if shape.tool != Tool::Text {
+                if shape.tool == Tool::Step {
+                    self.current_step += 1;
                 }
+                self.shapes.push(shape);
+                self.redo_stack.clear();
+            } else {
+                self.current_shape = Some(shape);
             }
         }
 
         // Text input handling
-        if self.current_tool == Tool::Text {
-            if let Some(shape) = &mut self.current_shape {
-                let mut finished = false;
-                let events = ctx.input(|i| i.events.clone());
-                for event in events {
-                    match event {
-                        egui::Event::Text(t) => shape.text.push_str(&t),
-                        egui::Event::Key {
-                            key: egui::Key::Backspace,
-                            pressed: true,
-                            ..
-                        } => {
-                            shape.text.pop();
-                        }
-                        egui::Event::Key {
-                            key: egui::Key::Enter,
-                            pressed: true,
-                            ..
-                        } => {
-                            finished = true;
-                        }
-                        _ => {}
+        if self.current_tool == Tool::Text
+            && let Some(shape) = &mut self.current_shape
+        {
+            let mut finished = false;
+            let events = ctx.input(|i| i.events.clone());
+            for event in events {
+                match event {
+                    egui::Event::Text(t) => shape.text.push_str(&t),
+                    egui::Event::Key {
+                        key: egui::Key::Backspace,
+                        pressed: true,
+                        ..
+                    } => {
+                        shape.text.pop();
                     }
+                    egui::Event::Key {
+                        key: egui::Key::Enter,
+                        pressed: true,
+                        ..
+                    } => {
+                        finished = true;
+                    }
+                    _ => {}
                 }
-                if finished {
-                    self.finish_text_if_any();
-                }
+            }
+            if finished {
+                self.finish_text_if_any();
             }
         }
     }
