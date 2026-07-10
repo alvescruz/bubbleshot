@@ -29,7 +29,9 @@ jobs:
       - run: pip install mkdocs-material Pillow cairosvg
       - run: mkdocs gh-deploy --force
       - name: Submit sitemap to IndexNow (Bing / Yandex / Seznam)
-        if: secrets.INDEXNOW_API_KEY
+        if: env.INDEXNOW_API_KEY != ''
+        env:
+          INDEXNOW_API_KEY: ${{ secrets.INDEXNOW_API_KEY }}
         uses: jakob-bagterp/index-now-submit-sitemap-urls-action@v1
         with:
           host: alvescruz.github.io
