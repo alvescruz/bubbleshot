@@ -35,5 +35,6 @@ jobs:
         uses: jakob-bagterp/index-now-submit-sitemap-urls-action@v1
         with:
           host: alvescruz.github.io
-          key: ${{ secrets.INDEXNOW_API_KEY }}
-          sitemap: https://alvescruz.github.io/theoshot/sitemap.xml
+          api_key: ${{ secrets.INDEXNOW_API_KEY }}
+          api_key_location: https://alvescruz.github.io/theoshot/${{ secrets.INDEXNOW_API_KEY }}.txt
+          sitemap_locations: https://alvescruz.github.io/theoshot/sitemap.xml
