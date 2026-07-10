@@ -24,5 +24,14 @@ jobs:
           path: .cache
           restore-keys: |
             mkdocs-material-
-      - run: pip install mkdocs-material
+      - name: Install system deps (social + optimize plugins)
+        run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libfreetype6-dev libjpeg-dev libpng-dev libgif-dev pngquant
+      - run: pip install mkdocs-material Pillow cairosvg
       - run: mkdocs gh-deploy --force
+      - name: Submit sitemap to IndexNow (Bing / Yandex / Seznam)
+        if: secrets.INDEXNOW_API_KEY
+        uses: jakob-bagterp/index-now-submit-sitemap-urls-action@v1
+        with:
+          host: alvescruz.github.io
+          key: ${{ secrets.INDEXNOW_API_KEY }}
+          sitemap: https://alvescruz.github.io/theoshot/sitemap.xml

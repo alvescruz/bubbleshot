@@ -1,3 +1,16 @@
+---
+description: >-
+  Troubleshoot common theoshot issues: black screen capture, keyboard shortcuts
+  not working, portal connection errors, clipboard persistence, and Wayland
+  configuration fixes.
+tags:
+  - troubleshooting
+  - faq
+  - wayland
+  - gnome
+  - errors
+---
+
 # Troubleshooting & FAQ
 
 If you encounter issues with **theoshot**, check these common scenarios.

@@ -1,3 +1,15 @@
+---
+description: >-
+  theoshot is a modern screen capture and annotation tool for Linux GNOME Wayland.
+  Built with Rust, with XDG Desktop Portal integration, vector annotations, and
+  native-resolution output. Free and open-source.
+tags:
+  - home
+  - overview
+  - screenshot
+  - annotation
+---
+
 # theoshot
 
 Welcome to the documentation for **theoshot**, a specialized screen capture and annotation tool designed for modern Linux environments.

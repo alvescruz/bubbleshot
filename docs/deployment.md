@@ -1,3 +1,15 @@
+---
+description: >-
+  Release process for theoshot: version bumping, tagging, CI/CD with GitHub Actions,
+  automated .deb and .rpm package generation, and distribution.
+tags:
+  - deployment
+  - release
+  - ci-cd
+  - packaging
+  - github-actions
+---
+
 # Deployment
 
 ## Creating a Release

@@ -1,3 +1,16 @@
+---
+description: >-
+  Contribute to theoshot development. Learn about the Rust project structure,
+  egui UI architecture, tiny-skia renderer, XDG Portal integration, how to build
+  from source, and testing guidelines.
+tags:
+  - development
+  - contributing
+  - rust
+  - architecture
+  - build
+---
+
 # Development
 
 Thank you for your interest in contributing to **theoshot**!

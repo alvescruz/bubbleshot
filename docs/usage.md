@@ -1,3 +1,17 @@
+---
+description: >-
+  Learn how to use theoshot: interactive annotation mode, quick screen capture,
+  GNOME keyboard shortcut setup, annotation tools (pen, arrow, rectangle, circle,
+  text, blur, steps), and keyboard shortcuts.
+tags:
+  - usage
+  - tutorial
+  - keyboard-shortcuts
+  - annotation-tools
+  - gnome
+  - wayland
+---
+
 # Usage
 
 theoshot can be used in two main modes: **Interactive** and **Screen**.

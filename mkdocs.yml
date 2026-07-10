@@ -1,9 +1,17 @@
 site_name: theoshot
-site_url: https://alvescruz.github.io/theoshot
-site_description: A simple screen capture and annotation tool for Linux
+site_url: https://alvescruz.github.io/theoshot/
+site_author: Alteon
+site_description: >-
+  theoshot is a modern screen capture and annotation tool for Linux (GNOME/Wayland).
+  Built with Rust, it provides XDG Desktop Portal integration, vector annotations
+  (arrows, rectangles, circles, text, blur, pen, step numbers), and native-resolution
+  output. A fast, secure alternative to Flameshot and GNOME Screenshot.
+
+copyright: Copyright &copy; 2025 Alteon. MIT License.
 
 theme:
   name: material
+  custom_dir: overrides
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -22,7 +30,10 @@ theme:
   features:
     - navigation.tabs
     - navigation.sections
+    - navigation.path
     - navigation.top
+    - navigation.instant
+    - navigation.instant.prefetch
     - search.suggest
     - search.highlight
     - content.code.copy
@@ -34,6 +45,29 @@ nav:
   - Troubleshooting: troubleshooting.md
   - Development: development.md
   - Deployment: deployment.md
+  - Tags: tags.md
+
+plugins:
+  - search
+  - tags
+  - social:
+      cards: true
+      cards_layout_options:
+        background_color: "#1a1a2e"
+        color: "#ffffff"
+        font_family: Roboto
+  - optimize:
+      optimize_png: true
+      optimize_jpg: true
+      optimize_jpg_quality: 85
+      cache: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/alvescruz/theoshot
+    - icon: fontawesome/brands/mastodon
+      link: https://fosstodon.org/@alteon
 
 markdown_extensions:
   - admonition
@@ -42,3 +76,5 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - attr_list
+  - md_in_html

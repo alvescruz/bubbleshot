@@ -1,3 +1,17 @@
+---
+description: >-
+  Install theoshot on Linux via the automatic script, .deb package (Debian/Ubuntu),
+  .rpm package (Fedora/RHEL), or build from source. System requirements and
+  dependencies included.
+tags:
+  - installation
+  - setup
+  - deb
+  - rpm
+  - build-from-source
+  - linux
+---
+
 # Installation
 
 The recommended way to install **theoshot** is using our automated installation script.
