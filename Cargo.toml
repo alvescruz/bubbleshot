@@ -1,5 +1,5 @@
 [package]
-name = "theoshot"
+name = "bubbleshot"
 version = "0.2.0"
 authors = ["Alteon <alteonalves@gmail.com>"]
 description = "A simple screen capture and annotation tool for Linux"
@@ -13,12 +13,12 @@ depends = "libgtk-3-0, libdbus-1-3, libpipewire-0.3-0"
 section = "utility"
 priority = "optional"
 assets = [
-    ["target/release/theoshot", "usr/bin/theoshot", "755"],
+    ["target/release/bubbleshot", "usr/bin/bubbleshot", "755"],
 ]
 
 [package.metadata.generate-rpm]
 assets = [
-    { source = "target/release/theoshot", dest = "/usr/bin/theoshot", mode = "755" },
+    { source = "target/release/bubbleshot", dest = "/usr/bin/bubbleshot", mode = "755" },
 ]
 
 [dependencies]

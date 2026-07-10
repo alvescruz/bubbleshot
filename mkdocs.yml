@@ -1,8 +1,8 @@
-site_name: theoshot
-site_url: https://alvescruz.github.io/theoshot/
+site_name: bubbleshot
+site_url: https://alvescruz.github.io/bubbleshot/
 site_author: Alteon
 site_description: >-
-  theoshot is a modern screen capture and annotation tool for Linux (GNOME/Wayland).
+  bubbleshot is a modern screen capture and annotation tool for Linux (GNOME/Wayland).
   Built with Rust, it provides XDG Desktop Portal integration, vector annotations
   (arrows, rectangles, circles, text, blur, pen, step numbers), and native-resolution
   output. A fast, secure alternative to Flameshot and GNOME Screenshot.
@@ -65,7 +65,7 @@ plugins:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/alvescruz/theoshot
+      link: https://github.com/alvescruz/bubbleshot
     - icon: fontawesome/brands/mastodon
       link: https://fosstodon.org/@alteon
 

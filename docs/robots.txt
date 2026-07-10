@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://alvescruz.github.io/theoshot/sitemap.xml
+Sitemap: https://alvescruz.github.io/bubbleshot/sitemap.xml

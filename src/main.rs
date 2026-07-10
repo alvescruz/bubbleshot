@@ -17,14 +17,14 @@ async fn main() {
     // This captures the entire screen without opening the selection dialog
     let interactive = !matches!(mode, "screen");
 
-    println!("[theoshot] Mode: {mode} (Interactive: {interactive})");
+    println!("[bubbleshot] Mode: {mode} (Interactive: {interactive})");
 
     match capture::capture_frame(interactive).await {
         Ok(frame) => {
             ui::run_ui(Some(frame.data), frame.width, frame.height);
         }
         Err(e) => {
-            eprintln!("[theoshot] Fatal error during capture: {e}");
+            eprintln!("[bubbleshot] Fatal error during capture: {e}");
         }
     }
 }

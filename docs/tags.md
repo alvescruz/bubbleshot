@@ -1,5 +1,5 @@
 ---
-description: Browse theoshot documentation by topic tags.
+description: Browse bubbleshot documentation by topic tags.
 ---
 
 # Tags

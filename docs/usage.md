@@ -1,6 +1,6 @@
 ---
 description: >-
-  Learn how to use theoshot: interactive annotation mode, quick screen capture,
+  Learn how to use bubbleshot: interactive annotation mode, quick screen capture,
   GNOME keyboard shortcut setup, annotation tools (pen, arrow, rectangle, circle,
   text, blur, steps), and keyboard shortcuts.
 tags:
@@ -14,7 +14,7 @@ tags:
 
 # Usage
 
-theoshot can be used in two main modes: **Interactive** and **Screen**.
+bubbleshot can be used in two main modes: **Interactive** and **Screen**.
 
 ## Execution Modes
 
@@ -23,7 +23,7 @@ theoshot can be used in two main modes: **Interactive** and **Screen**.
 Opens a transparent overlay for area selection and immediate annotation.
 
 ```bash
-theoshot interactive
+bubbleshot interactive
 ```
 
 ### Screen Mode
@@ -31,14 +31,14 @@ theoshot interactive
 Quickly captures the entire screen without the annotation UI.
 
 ```bash
-theoshot screen
+bubbleshot screen
 ```
 
 ---
 
 ## ⚡ Setting up a Keyboard Shortcut (GNOME)
 
-To get the most out of **theoshot**, you should bind it to a key (like `PrintScreen`). Since theoshot is designed for GNOME, here is how to set it up:
+To get the most out of **bubbleshot**, you should bind it to a key (like `PrintScreen`). Since bubbleshot is designed for GNOME, here is how to set it up:
 
 ![Setting up a custom shortcut in GNOME Settings](assets/screenshots/gnome-shortcut-setup.png)
 
@@ -47,18 +47,18 @@ To get the most out of **theoshot**, you should bind it to a key (like `PrintScr
 3.  Scroll down to **Custom Shortcuts**.
 4.  Click **Add Shortcut** (or the `+` button).
 5.  Fill in the details:
-    - **Name:** `theoshot Interactive`
-    - **Command:** `/usr/local/bin/theoshot interactive`
+    - **Name:** `bubbleshot Interactive`
+    - **Command:** `/usr/local/bin/bubbleshot interactive`
     - **Shortcut:** Press the key you want (e.g., `PrintScreen` or `Ctrl + PrintScreen`).
 6.  Click **Add**.
 
-Now you can trigger theoshot instantly anytime!
+Now you can trigger bubbleshot instantly anytime!
 
 ---
 
 ## In-App Controls
 
-![theoshot tool palette and main interface](assets/screenshots/ui-main.png)
+![bubbleshot tool palette and main interface](assets/screenshots/ui-main.png)
 
 ### Keyboard Shortcuts
 
@@ -72,7 +72,7 @@ Now you can trigger theoshot instantly anytime!
 
 ### Annotation Tools
 
-theoshot comes with a versatile set of tools to mark up your captures:
+bubbleshot comes with a versatile set of tools to mark up your captures:
 
 - 🎨 **Color Selector:** Click the colored circle to change your drawing color.
 - ✏️ **Pen:** Freehand drawing for quick highlights.

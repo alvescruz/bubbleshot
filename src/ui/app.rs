@@ -139,7 +139,7 @@ impl SelectionApp {
             && let Some(path) = FileDialog::new().set_file_name("shot.png").save_file()
         {
             if let Err(e) = img.save(path) {
-                eprintln!("[theoshot] Error saving image: {e}");
+                eprintln!("[bubbleshot] Error saving image: {e}");
             } else {
                 std::process::exit(0);
             }
@@ -170,14 +170,14 @@ impl SelectionApp {
                             bytes: Cow::from(raw_bytes),
                         };
                         if let Err(e) = cb.set_image(image_data) {
-                            eprintln!("[theoshot] Error copying image: {e}");
+                            eprintln!("[bubbleshot] Error copying image: {e}");
                         } else {
                             // Reduced delay for Linux persistence
                             std::thread::sleep(std::time::Duration::from_millis(150));
                         }
                     }
                     Err(e) => {
-                        eprintln!("[theoshot] Error accessing clipboard: {e}");
+                        eprintln!("[bubbleshot] Error accessing clipboard: {e}");
                     }
                 }
                 std::process::exit(0);

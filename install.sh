@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# theoshot installer script
-# This script downloads the latest release of theoshot, installs it,
+# bubbleshot installer script
+# This script downloads the latest release of bubbleshot, installs it,
 # and handles system dependencies automatically.
 
 set -e
 
-REPO="alvescruz/theoshot"
-BINARY_NAME="theoshot"
+REPO="alvescruz/bubbleshot"
+BINARY_NAME="bubbleshot"
 INSTALL_DIR="/usr/local/bin"
 
 # Colors for output
@@ -17,7 +17,7 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-printf "${BLUE}==>${NC} Installing ${GREEN}theoshot${NC}...\n"
+printf "${BLUE}==>${NC} Installing ${GREEN}bubbleshot${NC}...\n"
 
 # Check basic requirements
 check_dep() {
@@ -90,10 +90,10 @@ install_sys_deps
 ARCH=$(uname -m)
 case $ARCH in
     x86_64)
-        ASSET_NAME="theoshot-linux-amd64"
+        ASSET_NAME="bubbleshot-linux-amd64"
         ;;
     *)
-        printf "${RED}Error:${NC} Unsupported architecture: $ARCH. theoshot currently only provides amd64 binaries via this script.\n"
+        printf "${RED}Error:${NC} Unsupported architecture: $ARCH. bubbleshot currently only provides amd64 binaries via this script.\n"
         exit 1
         ;;
 esac
@@ -126,5 +126,5 @@ sudo chmod +x "$INSTALL_DIR/$BINARY_NAME"
 # Clean up
 rm -rf "$TMP_DIR"
 
-printf "\n${GREEN}Success!${NC} theoshot has been installed to $INSTALL_DIR\n"
-printf "You can now run it by typing: ${BLUE}theoshot interactive${NC} or ${BLUE}theoshot screen${NC}\n"
+printf "\n${GREEN}Success!${NC} bubbleshot has been installed to $INSTALL_DIR\n"
+printf "You can now run it by typing: ${BLUE}bubbleshot interactive${NC} or ${BLUE}bubbleshot screen${NC}\n"

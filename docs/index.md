@@ -1,6 +1,6 @@
 ---
 description: >-
-  theoshot is a modern screen capture and annotation tool for Linux GNOME Wayland.
+  bubbleshot is a modern screen capture and annotation tool for Linux GNOME Wayland.
   Built with Rust, with XDG Desktop Portal integration, vector annotations, and
   native-resolution output. Free and open-source.
 tags:
@@ -10,20 +10,20 @@ tags:
   - annotation
 ---
 
-# theoshot
+# bubbleshot
 
-Welcome to the documentation for **theoshot**, a specialized screen capture and annotation tool designed for modern Linux environments.
+Welcome to the documentation for **bubbleshot**, a specialized screen capture and annotation tool designed for modern Linux environments.
 
 !!! info "Target Environment"
-    **theoshot** is specifically built and tested for **Linux** using the **Wayland** display protocol and the **GNOME** desktop environment. It leverages XDG Desktop Portals to ensure secure and native integration.
+    **bubbleshot** is specifically built and tested for **Linux** using the **Wayland** display protocol and the **GNOME** desktop environment. It leverages XDG Desktop Portals to ensure secure and native integration.
 
-Built with Rust and egui, theoshot provides a fast, memory-safe way to take screenshots and annotate them immediately.
+Built with Rust and egui, bubbleshot provides a fast, memory-safe way to take screenshots and annotate them immediately.
 
 ---
 
 ## 📸 See it in Action
 
-![theoshot interactive mode and annotation tools](assets/screenshots/main-demo.gif)
+![bubbleshot interactive mode and annotation tools](assets/screenshots/main-demo.gif)
 
 ---
 
@@ -36,9 +36,9 @@ Built with Rust and egui, theoshot provides a fast, memory-safe way to take scre
 - **Multiple Modes:** Interactive overlay for precision or quick full-screen capture.
 - **Tutorial Friendly:** Includes a "Steps" tool to number parts of your screen easily.
 
-## ❓ Why theoshot?
+## ❓ Why bubbleshot?
 
-Most screenshot tools for Linux are either legacy (designed for X11) or very basic. **theoshot** was born to:
+Most screenshot tools for Linux are either legacy (designed for X11) or very basic. **bubbleshot** was born to:
 1.  Work perfectly with **Wayland** and Portals without "hacks".
 2.  Provide an **integrated annotation** flow—no more opening a second app just to draw an arrow.
 3.  Be **blazing fast** thanks to the Rust backend and immediate-mode UI.
@@ -53,16 +53,16 @@ Most screenshot tools for Linux are either legacy (designed for X11) or very bas
 
 ## Quick Start
 
-To install theoshot on your GNOME/Wayland system:
+To install bubbleshot on your GNOME/Wayland system:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/alvescruz/theoshot/main/install.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/alvescruz/bubbleshot/main/install.sh | sudo bash
 ```
 
 Then launch the interactive tool:
 
 ```bash
-theoshot interactive
+bubbleshot interactive
 ```
 
 Check the [Usage](usage.md) section to learn how to bind this to your PrintScreen key!

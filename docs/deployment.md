@@ -1,6 +1,6 @@
 ---
 description: >-
-  Release process for theoshot: version bumping, tagging, CI/CD with GitHub Actions,
+  Release process for bubbleshot: version bumping, tagging, CI/CD with GitHub Actions,
   automated .deb and .rpm package generation, and distribution.
 tags:
   - deployment
@@ -33,34 +33,34 @@ The CI pipeline (`.github/workflows/release.yml`) will:
 
 | Asset | Description |
 |---|---|
-| `theoshot-x86_64-unknown-linux-gnu` | Static binary |
-| `theoshot_0.2.0_amd64.deb` | Debian/Ubuntu package |
-| `theoshot-0.2.0-1.x86_64.rpm` | Fedora/RHEL package |
+| `bubbleshot-x86_64-unknown-linux-gnu` | Static binary |
+| `bubbleshot_0.2.0_amd64.deb` | Debian/Ubuntu package |
+| `bubbleshot-0.2.0-1.x86_64.rpm` | Fedora/RHEL package |
 | `install.sh` | Distribution-agnostic installer |
 
 ## Installation Methods
 
 ### Binary (any distro)
 ```bash
-curl -sSL https://github.com/alvescruz/theoshot/releases/latest/download/install.sh | sudo bash
+curl -sSL https://github.com/alvescruz/bubbleshot/releases/latest/download/install.sh | sudo bash
 ```
 
 ### Debian/Ubuntu
 ```bash
-wget https://github.com/alvescruz/theoshot/releases/download/v0.2.0/theoshot_0.2.0_amd64.deb
-sudo dpkg -i theoshot_0.2.0_amd64.deb
+wget https://github.com/alvescruz/bubbleshot/releases/download/v0.2.0/bubbleshot_0.2.0_amd64.deb
+sudo dpkg -i bubbleshot_0.2.0_amd64.deb
 ```
 
 ### Fedora/RHEL
 ```bash
-wget https://github.com/alvescruz/theoshot/releases/download/v0.2.0/theoshot-0.2.0-1.x86_64.rpm
-sudo rpm -i theoshot-0.2.0-1.x86_64.rpm
+wget https://github.com/alvescruz/bubbleshot/releases/download/v0.2.0/bubbleshot-0.2.0-1.x86_64.rpm
+sudo rpm -i bubbleshot-0.2.0-1.x86_64.rpm
 ```
 
 ### Build from source
 ```bash
-git clone https://github.com/alvescruz/theoshot.git
-cd theoshot
+git clone https://github.com/alvescruz/bubbleshot.git
+cd bubbleshot
 cargo build --release
-sudo cp target/release/theoshot /usr/local/bin/
+sudo cp target/release/bubbleshot /usr/local/bin/
 ```

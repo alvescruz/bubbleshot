@@ -18,7 +18,7 @@ pub fn run_ui(image_data: Option<Vec<u8>>, width: u32, height: u32) {
         ..Default::default()
     };
     eframe::run_native(
-        "theoshot",
+        "bubbleshot",
         options,
         Box::new(|_cc| Ok(Box::new(SelectionApp::new(image_data, width, height)))),
     )

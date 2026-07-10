@@ -1,7 +1,7 @@
-# GEMINI.md - theoshot
+# GEMINI.md - bubbleshot
 
 ## Project Identity
-**theoshot** is a screen capture and annotation tool for Linux, built with Rust and egui. It leverages XDG Desktop Portals via `ashpd` for secure and platform-agnostic screenshot capabilities on Wayland and X11.
+**bubbleshot** is a screen capture and annotation tool for Linux, built with Rust and egui. It leverages XDG Desktop Portals via `ashpd` for secure and platform-agnostic screenshot capabilities on Wayland and X11.
 
 ## Tech Stack
 - **Language:** Rust (Edition 2024)
