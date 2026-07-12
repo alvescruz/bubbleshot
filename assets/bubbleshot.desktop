@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=bubbleshot
+Comment=Screen capture and annotation tool for Linux
+Exec=/usr/bin/bubbleshot interactive
+Icon=/usr/share/icons/hicolor/512x512/apps/bubbleshot.png
+Terminal=false
+Type=Application
+Categories=Utility;Graphics;
+StartupNotify=true

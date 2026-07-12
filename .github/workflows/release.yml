@@ -50,7 +50,7 @@ jobs:
       - name: Prepare assets
         run: |
           mkdir -p dist
-          cp target/${{ matrix.target }}/release/bubbleshot dist/bubbleshot-${{ matrix.target }}
+          cp target/${{ matrix.target }}/release/bubbleshot dist/bubbleshot-linux-amd64
           cp target/${{ matrix.target }}/debian/*.deb dist/
           cp target/${{ matrix.target }}/generate-rpm/*.rpm dist/
           cp install.sh dist/install.sh

@@ -12,6 +12,8 @@ copyright: Copyright &copy; 2025 Alteon. MIT License.
 theme:
   name: material
   custom_dir: overrides
+  logo: assets/logo.png
+  favicon: assets/favicon.png
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default

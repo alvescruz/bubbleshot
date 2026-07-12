@@ -18,8 +18,8 @@ tags:
 2. Commit and push:
    ```bash
    git add Cargo.toml CHANGELOG.md
-   git commit -m "Release v0.2.0"
-   git tag v0.2.0
+   git commit -m "Release v0.3.0"
+   git tag v0.3.0
    git push origin main --tags
    ```
 
@@ -33,9 +33,9 @@ The CI pipeline (`.github/workflows/release.yml`) will:
 
 | Asset | Description |
 |---|---|
-| `bubbleshot-x86_64-unknown-linux-gnu` | Static binary |
-| `bubbleshot_0.2.0_amd64.deb` | Debian/Ubuntu package |
-| `bubbleshot-0.2.0-1.x86_64.rpm` | Fedora/RHEL package |
+| `bubbleshot-linux-amd64` | Static binary |
+| `bubbleshot_0.3.0_amd64.deb` | Debian/Ubuntu package |
+| `bubbleshot-0.3.0-1.x86_64.rpm` | Fedora/RHEL package |
 | `install.sh` | Distribution-agnostic installer |
 
 ## Installation Methods
@@ -47,14 +47,14 @@ curl -sSL https://github.com/alvescruz/bubbleshot/releases/latest/download/insta
 
 ### Debian/Ubuntu
 ```bash
-wget https://github.com/alvescruz/bubbleshot/releases/download/v0.2.0/bubbleshot_0.2.0_amd64.deb
-sudo dpkg -i bubbleshot_0.2.0_amd64.deb
+wget https://github.com/alvescruz/bubbleshot/releases/download/v0.3.0/bubbleshot_0.3.0_amd64.deb
+sudo dpkg -i bubbleshot_0.3.0_amd64.deb
 ```
 
 ### Fedora/RHEL
 ```bash
-wget https://github.com/alvescruz/bubbleshot/releases/download/v0.2.0/bubbleshot-0.2.0-1.x86_64.rpm
-sudo rpm -i bubbleshot-0.2.0-1.x86_64.rpm
+wget https://github.com/alvescruz/bubbleshot/releases/download/v0.3.0/bubbleshot-0.3.0-1.x86_64.rpm
+sudo rpm -i bubbleshot-0.3.0-1.x86_64.rpm
 ```
 
 ### Build from source

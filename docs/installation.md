@@ -52,15 +52,15 @@ If you are not using one of the supported distros above, please install these ma
 Download the latest `.deb` from the [releases page](https://github.com/alvescruz/bubbleshot/releases):
 
 ```bash
-wget https://github.com/alvescruz/bubbleshot/releases/latest/download/bubbleshot_0.2.0_amd64.deb
-sudo dpkg -i bubbleshot_0.2.0_amd64.deb
+wget https://github.com/alvescruz/bubbleshot/releases/latest/download/bubbleshot_0.3.0_amd64.deb
+sudo dpkg -i bubbleshot_0.3.0_amd64.deb
 ```
 
 ## Install via .rpm (Fedora/RHEL)
 
 ```bash
-wget https://github.com/alvescruz/bubbleshot/releases/latest/download/bubbleshot-0.2.0-1.x86_64.rpm
-sudo rpm -i bubbleshot-0.2.0-1.x86_64.rpm
+wget https://github.com/alvescruz/bubbleshot/releases/latest/download/bubbleshot-0.3.0-1.x86_64.rpm
+sudo rpm -i bubbleshot-0.3.0-1.x86_64.rpm
 ```
 
 ## Building from Source

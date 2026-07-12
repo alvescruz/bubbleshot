@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.0] - 2026-07-11
+
+### Changed
+- Projeto renomeado de **theoshot** para **bubbleshot**
+- Logo e ícone do aplicativo adicionados (gradiente roxo com bolhas)
+- Ícone da janela configurado via `eframe::ViewportBuilder::with_icon()`
+- Site mkdocs agora exibe logo e favicon
+
+### Added
+- `assets/logo.svg` — logo vetorial do projeto
+- `assets/bubbleshot.desktop` — arquivo `.desktop` para integração com launcher Linux
+- Metadados de empacotamento: ícone incluso nos pacotes `.deb` e `.rpm`
+- Meta tags Open Graph / Twitter Cards com imagem de preview
+
+### Fixed
+- install.sh agora baixa o asset com o nome correto (`bubbleshot-linux-amd64`)
+- Versão atualizada para `0.3.0` em toda a documentação
+
 ## [0.2.0] - 2026-07-09
 
 ### Changed
