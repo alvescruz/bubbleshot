@@ -1,6 +1,6 @@
 [package]
 name = "bubbleshot"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Alteon <alteonalves@gmail.com>"]
 description = "A simple screen capture and annotation tool for Linux"
 license = "MIT"
