@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.1] - 2026-08-16
+
+### Changed
+- Novo ícone do aplicativo (`assets/icon.png`)
+- Logo e favicon do site de documentação atualizados
+
 ## [0.3.0] - 2026-07-11
 
 ### Changed
