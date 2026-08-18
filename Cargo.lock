@@ -645,7 +645,7 @@ dependencies = [
 
 [[package]]
 name = "bubbleshot"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "ab_glyph",
  "arboard",
